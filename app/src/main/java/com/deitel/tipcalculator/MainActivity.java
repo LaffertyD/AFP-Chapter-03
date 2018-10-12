@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
    private double billAmount = 0.0; // bill amount entered by the user
    private double percent = 0.15; // initial tip percentage
+   private double numParty = 1;
+
    private TextView amountTextView; // shows formatted bill amount
    private TextView percentTextView; // shows tip percentage
    private TextView tipTextView; // shows calculated tip amount
@@ -52,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
       SeekBar percentSeekBar =
          (SeekBar) findViewById(R.id.percentSeekBar);
       percentSeekBar.setOnSeekBarChangeListener(seekBarListener);
+
+      // set party size TextWatcher
+      EditText partyEditText =
+              (EditText) findViewById(R.id.enterPartyNum);
+      partyEditText.addTextChangedListener(partySizeEditTextWatcher);
    }
 
    // calculate and display tip and total amounts
@@ -60,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
       percentTextView.setText(percentFormat.format(percent));
 
       // calculate the tip and total
-      double tip = billAmount * percent;
-      double total = billAmount + tip;
+      double tip = (billAmount * percent)/numParty;
+      double total = (billAmount + tip)/numParty;
 
       // display tip and total formatted as currency
       tipTextView.setText(currencyFormat.format(tip));
@@ -87,11 +94,11 @@ public class MainActivity extends AppCompatActivity {
       };
 
    // listener object for the EditText's text-changed events
-   private final TextWatcher amountEditTextWatcher = new TextWatcher() {
+   private final TextWatcher amountEditTextWatcher = new TextWatcher() {   //text watcher for the amount field
       // called when the user modifies the bill amount
       @Override
       public void onTextChanged(CharSequence s, int start,
-         int before, int count) {
+                                int before, int count) {
 
          try { // get bill amount and display currency formatted value
             billAmount = Double.parseDouble(s.toString()) / 100.0;
@@ -110,7 +117,33 @@ public class MainActivity extends AppCompatActivity {
 
       @Override
       public void beforeTextChanged(
-         CharSequence s, int start, int count, int after) { }
+              CharSequence s, int start, int count, int after) { }
+   };
+   // text watcher for party size
+   private final TextWatcher partySizeEditTextWatcher = new TextWatcher() {
+      // called when the user modifies the bill amount
+      @Override
+      public void onTextChanged(CharSequence s, int start,
+                                int before, int count) {
+
+         try { // get bill amount and display currency formatted value
+            numParty = Double.parseDouble(s.toString());
+            //amountTextView.setText(currencyFormat.format(billAmount));
+         }
+         catch (NumberFormatException e) { // if s is empty or non-numeric
+            //amountTextView.setText("");
+            //billAmount = 0.0;
+         }
+
+         calculate(); // update the tip and total TextViews
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) { }
+
+      @Override
+      public void beforeTextChanged(
+              CharSequence s, int start, int count, int after) { }
    };
 }
 
